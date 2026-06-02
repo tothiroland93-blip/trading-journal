@@ -155,7 +155,7 @@ canvas{max-width:100%}
   <div class="card">
     <div class="card-title">Recent Trades — click any row to view details</div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>Date</th><th>Symbol</th><th>Direction</th><th>Setup</th><th>PnL (USD)</th><th>Result</th>
+      <th class="sortable" onclick="sortJournal('date')" id="th-date">Date</th><th class="sortable" onclick="sortJournal('symbol')" id="th-symbol">Symbol</th><th>Direction</th><th>Setup</th><th>PnL (USD)</th><th>Result</th>
     </tr></thead><tbody id="recent-trades"></tbody></table></div>
   </div>
   <div class="card">
@@ -235,14 +235,14 @@ canvas{max-width:100%}
   <div class="card">
     <div class="card-title">Click any row to view details</div>
     <div class="tbl-wrap"><table id="journal-table"><thead><tr>
-      <th>Date</th>
-      <th>Symbol</th>
-      <th>Market</th>
-      <th>Dir</th>
-      <th>Entry</th>
-      <th>Exit</th>
+      <th class="sortable" onclick="sortJournal('date')" id="th-date">Date</th>
+      <th class="sortable" onclick="sortJournal('symbol')" id="th-symbol">Symbol</th>
+      <th class="sortable" onclick="sortJournal('market')" id="th-market">Market</th>
+      <th class="sortable" onclick="sortJournal('direction')" id="th-direction">Dir</th>
+      <th class="sortable" onclick="sortJournal('entry')" id="th-entry">Entry</th>
+      <th class="sortable" onclick="sortJournal('exit')" id="th-exit">Exit</th>
       <th class="sortable" onclick="sortJournal('pnl')" id="th-pnl">PnL</th>
-      <th>R:R</th>
+      <th class="sortable" onclick="sortJournal('rr')" id="th-rr">R:R</th>
       <th class="sortable" onclick="sortJournal('setup')" id="th-setup">Setup</th>
       <th></th>
     </tr></thead><tbody id="journal-body"></tbody></table></div>
@@ -264,7 +264,7 @@ canvas{max-width:100%}
   <div id="day-detail-section" class="card" style="display:none">
     <div class="card-title" id="day-detail-title"></div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>Symbol</th><th>Direction</th><th>Entry</th><th>Exit</th><th>PnL</th><th>R:R</th><th>Setup</th>
+      <th class="sortable" onclick="sortJournal('symbol')" id="th-symbol">Symbol</th><th>Direction</th><th class="sortable" onclick="sortJournal('entry')" id="th-entry">Entry</th><th class="sortable" onclick="sortJournal('exit')" id="th-exit">Exit</th><th>PnL</th><th class="sortable" onclick="sortJournal('rr')" id="th-rr">R:R</th><th>Setup</th>
     </tr></thead><tbody id="day-detail-body"></tbody></table></div>
   </div>
 </div>
@@ -605,9 +605,9 @@ function onMonthFilter(){document.getElementById('ff-date').value='';renderJourn
 
 function sortJournal(col){
   if(journalSortCol===col){journalSortDir*=-1;}else{journalSortCol=col;journalSortDir=1;}
-  // update header indicators
-  ['pnl','setup'].forEach(c=>{
+  ['date','symbol','market','direction','entry','exit','pnl','rr','setup'].forEach(c=>{
     const th=document.getElementById('th-'+c);
+    if(!th)return;
     th.classList.remove('asc','desc');
     if(c===journalSortCol)th.classList.add(journalSortDir===1?'asc':'desc');
   });
@@ -626,10 +626,20 @@ function renderJournal(){
   if(dateF)list=list.filter(x=>fmtDate(x.date)===dateF);
   else if(monthF)list=list.filter(x=>x.date.startsWith(monthF));
   // apply sort
-  if(journalSortCol==='pnl'){
-    list.sort((a,b)=>journalSortDir*(Number(a.pnl)-Number(b.pnl)));
-  } else if(journalSortCol==='setup'){
-    list.sort((a,b)=>journalSortDir*(a.setup||'').localeCompare(b.setup||''));
+  if(journalSortCol){
+    list.sort((a,b)=>{
+      let av,bv;
+      if(journalSortCol==='pnl'){av=Number(a.pnl);bv=Number(b.pnl);return journalSortDir*(av-bv);}
+      if(journalSortCol==='entry'){av=Number(a.entry);bv=Number(b.entry);return journalSortDir*(av-bv);}
+      if(journalSortCol==='exit'){av=Number(a.exit);bv=Number(b.exit);return journalSortDir*(av-bv);}
+      if(journalSortCol==='rr'){av=Number(a.rr||0);bv=Number(b.rr||0);return journalSortDir*(av-bv);}
+      if(journalSortCol==='date'){return journalSortDir*(a.date||'').localeCompare(b.date||'');}
+      if(journalSortCol==='symbol'){return journalSortDir*(a.symbol||'').localeCompare(b.symbol||'');}
+      if(journalSortCol==='market'){return journalSortDir*(a.market||'').localeCompare(b.market||'');}
+      if(journalSortCol==='direction'){return journalSortDir*(a.direction||'').localeCompare(b.direction||'');}
+      if(journalSortCol==='setup'){return journalSortDir*(a.setup||'').localeCompare(b.setup||'');}
+      return 0;
+    });
   }
   document.getElementById('journal-body').innerHTML=list.length?list.map(x=>`<tr class="clickable" onclick="openModal(${x.id})">
     <td>${fmtDate(x.date)}</td><td style="color:var(--text);font-weight:500">${x.symbol}</td>
