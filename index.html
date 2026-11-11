@@ -131,11 +131,12 @@ canvas{max-width:100%}
 <div id="lock-screen">
   <div class="lock-box">
     <div class="lock-logo">// TRADE_LOG</div>
-    <div class="lock-sub">Enter your password to continue</div>
+    <div class="lock-sub">Sign in to your journal</div>
+    <input class="lock-input" type="email" id="lock-email" placeholder="email" autocomplete="username" style="letter-spacing:0">
     <input class="lock-input" type="password" id="lock-input" placeholder="••••••••">
     <button class="lock-btn" onclick="checkPassword()">Unlock</button>
     <div class="lock-error" id="lock-error"></div>
-    <div class="lock-hint">Default password: <strong>tradelog2024</strong><br>Change it in Settings.</div>
+    <div class="lock-hint"><a href="#" id="offline-link" onclick="offlineMode();return false" style="display:none;color:var(--text3)">Continue without cloud (local preview)</a></div>
   </div>
 </div>
 
@@ -272,14 +273,8 @@ canvas{max-width:100%}
 <!-- SETTINGS -->
 <div id="page-settings" class="page">
   <div class="card" style="max-width:480px">
-    <div class="card-title">Security — Change Password</div>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="fg"><label>Current Password</label><input type="password" id="s-current" placeholder="••••••••"></div>
-      <div class="fg"><label>New Password</label><input type="password" id="s-new" placeholder="••••••••"></div>
-      <div class="fg"><label>Confirm New Password</label><input type="password" id="s-confirm" placeholder="••••••••"></div>
-      <button class="btn btn-accent" onclick="changePassword()" style="align-self:flex-start">Update Password</button>
-      <div id="pw-msg" style="font-size:13px;min-height:18px"></div>
-    </div>
+    <div class="card-title">Account</div>
+    <button class="btn" onclick="logout()">Sign out</button>
   </div>
   <div class="card" style="max-width:480px">
     <div class="card-title">AI Analysis — Anthropic API Key</div>
@@ -335,39 +330,22 @@ canvas{max-width:100%}
 </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-// ── PASSWORD ──────────────────────────────────────────────
-const DEFAULT_PW='tradelog2024';
-function getStoredPw(){return localStorage.getItem('tj_pw')||DEFAULT_PW;}
-function checkPassword(){
-  const val=document.getElementById('lock-input').value;
-  const err=document.getElementById('lock-error');
-  if(val===getStoredPw()){
-    document.getElementById('lock-screen').style.display='none';
-    document.getElementById('main-app').style.display='flex';
-    loadTrades();initDate();
-    const n=new Date();calYear=n.getFullYear();calMonth=n.getMonth();
-    renderDashboard();
-  } else {
-    err.textContent='Incorrect password.';
-    document.getElementById('lock-input').value='';
-    setTimeout(()=>err.textContent='',3000);
-  }
-}
-function changePassword(){
-  const cur=document.getElementById('s-current').value;
-  const nw=document.getElementById('s-new').value;
-  const conf=document.getElementById('s-confirm').value;
-  const msg=document.getElementById('pw-msg');
-  if(cur!==getStoredPw()){msg.style.color='var(--red)';msg.textContent='Current password incorrect.';return;}
-  if(nw.length<6){msg.style.color='var(--red)';msg.textContent='Min 6 characters.';return;}
-  if(nw!==conf){msg.style.color='var(--red)';msg.textContent='Passwords do not match.';return;}
-  localStorage.setItem('tj_pw',nw);
-  msg.style.color='var(--green)';msg.textContent='Password updated!';
-  ['s-current','s-new','s-confirm'].forEach(id=>document.getElementById(id).value='');
-  setTimeout(()=>msg.textContent='',3000);
-}
+// ── CLOUD (Supabase) ──────────────────────────────────────
+const SB_URL='https://iosclzdkcfttuxwmksat.supabase.co';
+const SB_KEY='sb_publishable_SZdSoVczDACLUV8sD03Edg_TI6wFcUB';
+let sb=null,uid=null,offline=false;
+try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
+
+let trades=[],calYear,calMonth,imgBase64='',pnlChart=null,selectedDay=null,currentModalId=null;
+let journalSortCol=null,journalSortDir=1;
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function getTrade(id){return trades.find(t=>t.id===id);}
+function fmt(n){return(n>=0?'+':'')+Number(n).toFixed(2);}
+function fmtDate(d){return d?d.slice(0,10):''}
+function getApiKey(){return localStorage.getItem('tj_apikey')||'';}
 function saveApiKey(){
   const key=document.getElementById('s-apikey').value.trim();
   const msg=document.getElementById('apikey-msg');
@@ -376,36 +354,136 @@ function saveApiKey(){
   msg.style.color='var(--green)';msg.textContent='API key saved!';
   setTimeout(()=>msg.textContent='',3000);
 }
-function getApiKey(){return localStorage.getItem('tj_apikey')||'';}
+
+// ── LOGIN ─────────────────────────────────────────────────
+async function checkPassword(){
+  const em=document.getElementById('lock-email').value.trim();
+  const pw=document.getElementById('lock-input').value;
+  const err=document.getElementById('lock-error');
+  if(!sb){err.textContent='Cloud library failed to load.';return;}
+  err.textContent='Signing in...';
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email:em,password:pw});
+    if(error){err.textContent=error.message;return;}
+    err.textContent='';
+    await startApp(data.user);
+  }catch(e){err.textContent='Cannot reach the cloud: '+e.message;}
+}
+async function startApp(user){uid=user.id;await loadTrades();unlock();}
+function unlock(){
+  document.getElementById('lock-screen').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  initDate();const n=new Date();calYear=n.getFullYear();calMonth=n.getMonth();
+  renderDashboard();
+}
+function offlineMode(){
+  offline=true;
+  document.querySelector('.nav-logo').textContent='// LOCAL PREVIEW';
+  loadTrades().then(unlock);
+}
+async function logout(){if(sb&&!offline)await sb.auth.signOut();location.reload();}
+window.addEventListener('load',async()=>{
+  if(!location.hostname.endsWith('github.io'))document.getElementById('offline-link').style.display='inline';
+  if(!sb)return;
+  try{const {data}=await sb.auth.getSession();if(data.session)await startApp(data.session.user);}catch(e){}
+});
+
+// ── IMAGES ────────────────────────────────────────────────
+async function toBlob(src,max=1600){
+  const b=await (await fetch(src)).blob();
+  const bmp=await createImageBitmap(b);
+  const k=Math.min(1,max/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  return new Promise(r=>c.toBlob(r,'image/jpeg',0.82));
+}
+function blobToB64(b){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b);});}
+async function toB64(src){return blobToB64(await toBlob(src));}
 
 // ── DATA ──────────────────────────────────────────────────
-let trades=[],calYear,calMonth,imgBase64='',pnlChart=null,selectedDay=null,currentModalId=null;
-let journalSortCol=null,journalSortDir=1;
-const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-function loadTrades(){try{const s=localStorage.getItem('tj3_trades');trades=s?JSON.parse(s):[];}catch(e){trades=[];}}
-function saveTrades(){try{localStorage.setItem('tj3_trades',JSON.stringify(trades));}catch(e){}}
-function getTrade(id){return trades.find(t=>t.id===id);}
-function fmt(n){return(n>=0?'+':'')+Number(n).toFixed(2);}
-function fmtDate(d){return d?d.slice(0,10):''}
+function persistLocal(){try{localStorage.setItem('tj3_trades',JSON.stringify(trades));}catch(e){alert('Local storage is full.');}}
+async function loadTrades(){
+  if(offline){try{trades=JSON.parse(localStorage.getItem('tj3_trades')||'[]');}catch(e){trades=[];}return;}
+  const {data,error}=await sb.from('trades').select('*').order('trade_date',{ascending:false});
+  if(error){alert('Load error: '+error.message);trades=[];return;}
+  trades=data.map(r=>({id:r.id,date:r.trade_date||'',symbol:r.symbol,market:r.market,direction:r.direction,entry:r.entry_price,exit:r.exit_price,pnl:Number(r.pnl),rr:r.rr,setup:r.setup||'',notes:r.notes||'',img_path:r.img_path||'',img:''}));
+  const paths=trades.filter(t=>t.img_path).map(t=>t.img_path);
+  if(paths.length){
+    const {data:u}=await sb.storage.from('screenshots').createSignedUrls(paths,43200);
+    (u||[]).forEach(x=>{const t=trades.find(t=>t.img_path===x.path);if(t&&x.signedUrl)t.img=x.signedUrl;});
+  }
+}
+async function insertTrade(t){
+  try{
+    if(t.img&&t.img.startsWith('data:')){
+      const blob=await toBlob(t.img);
+      const path=uid+'/'+t.id+'.jpg';
+      const {error:ue}=await sb.storage.from('screenshots').upload(path,blob,{contentType:'image/jpeg',upsert:true});
+      if(ue)throw ue;
+      t.img_path=path;
+      const {data:s}=await sb.storage.from('screenshots').createSignedUrl(path,43200);
+      t.img=s?s.signedUrl:'';
+    }else if(!t.img_path){t.img='';}
+    const {error}=await sb.from('trades').upsert({id:t.id,trade_date:t.date,symbol:t.symbol,market:t.market,direction:t.direction,entry_price:t.entry,exit_price:t.exit,pnl:t.pnl,rr:t.rr,setup:t.setup,notes:t.notes,img_path:t.img_path||null});
+    if(error)throw error;
+    return true;
+  }catch(e){alert('Save failed: '+e.message);return false;}
+}
+async function saveTrade(){
+  const pnl=parseFloat(document.getElementById('f-pnl').value);
+  if(isNaN(pnl)){alert('Enter the PnL value.');return;}
+  const t={id:Date.now(),date:document.getElementById('f-date').value,symbol:getSymbol(),market:document.getElementById('f-market').value,direction:document.getElementById('f-direction').value,entry:parseFloat(document.getElementById('f-entry').value)||0,exit:parseFloat(document.getElementById('f-exit').value)||0,pnl,rr:parseFloat(document.getElementById('f-rr').value)||0,setup:document.getElementById('f-setup').value.trim(),notes:document.getElementById('f-notes').value.trim(),img:imgBase64,img_path:''};
+  const msg=document.getElementById('save-msg');
+  msg.textContent='Saving...';msg.style.display='inline';
+  if(offline){trades.unshift(t);persistLocal();}
+  else{if(!await insertTrade(t)){msg.style.display='none';return;}trades.unshift(t);}
+  msg.textContent='✓ Trade saved!';
+  setTimeout(()=>msg.style.display='none',2500);
+  clearForm();
+}
+async function removeTrade(id){
+  const t=getTrade(id);
+  if(!offline){
+    try{
+      const {error}=await sb.from('trades').delete().eq('id',id);
+      if(error)throw error;
+      if(t&&t.img_path)await sb.storage.from('screenshots').remove([t.img_path]);
+    }catch(e){alert('Delete failed: '+e.message);return false;}
+  }
+  trades=trades.filter(x=>x.id!==id);
+  if(offline)persistLocal();
+  return true;
+}
+async function deleteFromModal(id){
+  if(!confirm('Delete this trade?'))return;
+  if(!await removeTrade(id))return;
+  closeModal();renderDashboard();renderJournal();
+  if(document.getElementById('page-calendar').classList.contains('active'))renderCalendar();
+}
+async function deleteJournal(id){if(!confirm('Delete?'))return;if(await removeTrade(id))renderJournal();}
 
 function exportData(){
-  const blob=new Blob([JSON.stringify(trades,null,2)],{type:'application/json'});
+  const out=trades.map(t=>offline?t:{...t,img:''});
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='tradelog-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();
 }
-function importData(input){
+async function importData(input){
   const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const data=JSON.parse(e.target.result);
-      if(!Array.isArray(data))throw new Error();
-      trades=data;saveTrades();renderDashboard();
-      alert('Import successful! '+data.length+' trades loaded.');
-    }catch(err){alert('Import failed: invalid file.');}
-  };
-  reader.readAsText(file);
+  let data;
+  try{data=JSON.parse(await file.text());if(!Array.isArray(data))throw 0;}catch(e){alert('Import failed: invalid file.');return;}
+  if(!confirm('Import '+data.length+' trades? Images can take a while, keep this tab open.'))return;
+  let ok=0;
+  for(const t of data){
+    const c={...t,pnl:Number(t.pnl),img_path:t.img_path||''};
+    if(c.img&&!c.img.startsWith('data:'))c.img='';
+    if(offline){trades=trades.filter(x=>x.id!==c.id);trades.push(c);ok++;continue;}
+    if(await insertTrade(c))ok++;else break;
+  }
+  if(offline)persistLocal();else await loadTrades();
+  renderDashboard();renderJournal();
+  alert('Import done: '+ok+' of '+data.length+' trades.');
+  input.value='';
 }
 
 // ── NAV ───────────────────────────────────────────────────
@@ -488,12 +566,6 @@ function openModal(id){
 }
 function closeModal(){document.getElementById('modal-backdrop').style.display='none';document.body.style.overflow='';currentModalId=null;}
 function closeModalBackdrop(e){if(e.target===document.getElementById('modal-backdrop'))closeModal();}
-function deleteFromModal(id){
-  if(!confirm('Delete this trade?'))return;
-  trades=trades.filter(t=>t.id!==id);saveTrades();closeModal();
-  renderDashboard();renderJournal();
-  if(document.getElementById('page-calendar').classList.contains('active'))renderCalendar();
-}
 
 // ── AI ────────────────────────────────────────────────────
 async function analyzeModalChart(){
@@ -515,7 +587,7 @@ async function runAI(imageData,symbol,direction,setup,entry,exit,pnl,outputEl){
   if(!apiKey){outputEl.textContent='No API key. Go to Settings → AI Analysis.';return;}
   const prompt=`You are a professional futures and crypto trader specializing in orderflow analysis, Smart Money Concepts (SMC), and price action.\n\nAnalyze this chart:\n- Symbol: ${symbol}, Direction: ${direction}\n- Entry: ${entry}, Exit: ${exit}, PnL: ${pnl} USD, Setup: ${setup}\n\n1. **Market Structure** – trend, BOS, CHoCH, key levels\n2. **Entry Quality** – was the entry optimal?\n3. **Orderflow** – FVGs, liquidity pools, order blocks\n4. **What Was Done Well**\n5. **What Could Be Improved**\n6. **Ideal Entry** – textbook version\n\nBe direct and specific.`;
   try{
-    const base64=imageData.includes(',')?imageData.split(',')[1]:imageData;
+    const base64=await toB64(imageData);
     const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[
@@ -578,15 +650,6 @@ function onImgUpload(input){
     document.getElementById('ai-panel-add').style.display='none';
   };
   reader.readAsDataURL(file);
-}
-function saveTrade(){
-  const pnl=parseFloat(document.getElementById('f-pnl').value);
-  if(isNaN(pnl)){alert('Enter the PnL value.');return;}
-  trades.unshift({id:Date.now(),date:document.getElementById('f-date').value,symbol:getSymbol(),market:document.getElementById('f-market').value,direction:document.getElementById('f-direction').value,entry:parseFloat(document.getElementById('f-entry').value)||0,exit:parseFloat(document.getElementById('f-exit').value)||0,pnl,rr:parseFloat(document.getElementById('f-rr').value)||0,setup:document.getElementById('f-setup').value.trim(),notes:document.getElementById('f-notes').value.trim(),img:imgBase64});
-  saveTrades();
-  const msg=document.getElementById('save-msg');msg.style.display='inline';
-  setTimeout(()=>msg.style.display='none',2500);
-  clearForm();
 }
 function clearForm(){
   ['f-entry','f-exit','f-pnl','f-rr','f-setup','f-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -652,7 +715,6 @@ function renderJournal(){
     <td><button class="btn-sm" onclick="event.stopPropagation();deleteJournal(${x.id})">×</button></td>
   </tr>`).join(''):`<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:2rem">No trades match filters.</td></tr>`;
 }
-function deleteJournal(id){if(!confirm('Delete?'))return;trades=trades.filter(t=>t.id!==id);saveTrades();renderJournal();}
 
 // ── CALENDAR ──────────────────────────────────────────────
 function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}selectedDay=null;renderCalendar();}
