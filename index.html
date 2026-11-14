@@ -12,7 +12,7 @@
 :root{
   --bg:#0a0b0d;--surface:#0f1012;--surface2:#16171a;--surface3:#202125;
   --border:#1e1f23;--border2:#2c2d32;
-  --text:#e8e9eb;--text2:#9a9da4;--text3:#5f626a;
+  --text:#eceef0;--text2:#b2b5bc;--text3:#8d919a;
   --green:#3dd68c;--green-dim:#0c2a1e;
   --red:#f0616d;--red-dim:#2a1114;
   --accent:#3dd68c;--accent-dim:#0f2a20;
@@ -182,7 +182,7 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:po
 .cs-b{width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font:inherit;font-size:14px;padding:9px 36px 9px 12px;cursor:pointer;position:relative;white-space:nowrap}
 .cs-b.jin{font-size:13px;padding:8px 36px 8px 12px;background:var(--surface)}
 .cs-b::after{content:'';position:absolute;right:14px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--text3);border-bottom:1.5px solid var(--text3);transform:translateY(-70%) rotate(45deg)}
-.cs-m{display:none;position:absolute;left:0;top:calc(100% + 4px);min-width:100%;max-height:260px;overflow:auto;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:4px;z-index:80;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.cs-m{display:none;position:absolute;left:0;top:calc(100% + 4px);min-width:100%;max-height:min(70vh,440px);overflow:auto;overscroll-behavior:contain;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:4px;z-index:80;box-shadow:0 12px 30px rgba(0,0,0,.5)}
 .cs-o{padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--text2);font-size:13px;white-space:nowrap}.cs-o:hover{background:var(--surface3);color:var(--text)}.cs-o.on{color:var(--green)}
 
 .nav-logo{display:flex;align-items:center;gap:10px;font-family:'Geist',sans-serif;font-size:16px;font-weight:600;color:var(--text);letter-spacing:.01em;margin-right:0}
@@ -272,7 +272,7 @@ canvas{max-width:100%}
     </tr></thead><tbody id="recent-trades"></tbody></table></div>
   </div>
   <div class="card">
-    <div class="card-title">Daily PnL (bars) and cumulative PnL (line)</div>
+    <div class="card-title">Daily PnL</div>
     <div style="height:230px"><canvas id="pnl-chart"></canvas></div>
   </div>
   <div class="card"><div class="card-title">Best setups — ranked by EV (R)</div><div id="best-setups"></div></div>
@@ -624,7 +624,7 @@ function renderAccBtn(){
   const b=document.getElementById('acc-btn');
   if(b)b.textContent='Accounts '+selAccs.size+'/'+accounts.length+' ▾';
   const p=document.getElementById('acc-panel');if(!p)return;
-  p.innerHTML='<div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn-sm" onclick="selAll(true)">Select all</button><button class="btn-sm" onclick="selAll(false)">Unselect all</button></div>'+
+  p.innerHTML='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><button class="btn-sm" onclick="selAll(true)">Select all</button><button class="btn-sm" onclick="selAll(false)">Unselect all</button><button class="btn-sm" onclick="selVariant(false)">Standard only</button><button class="btn-sm" onclick="selVariant(true)">Turbo only</button></div>'+
     accounts.map(a=>`<label style="display:flex;gap:8px;align-items:center;padding:5px 2px;cursor:pointer;color:var(--text)"><input type="checkbox" ${selAccs.has(a.id)?'checked':''} onchange="toggleAcc(${a.id},this.checked)">${esc(a.name)}</label>`).join('');
 }
 function rOf(t){const p=Number(t.pnl);if(p<0)return -1;if(p>0)return Number(t.rr)||0;return 0;}
@@ -646,7 +646,7 @@ function renderAccounts(){
     return `<tr><td><input type="checkbox" ${selAccs.has(a.id)?'checked':''} onchange="toggleAcc(${a.id},this.checked)"></td>
       <td style="color:var(--text);font-weight:500">${esc(a.name)}</td><td>${type}</td>
       <td><select onchange="setStatus(${a.id},this.value)" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:${col[st]};padding:4px 6px;font-family:inherit">${opt('active','Active')}${opt('funded','Funded')}${opt('lost','Lost')}</select></td>
-      <td style="font-family:'Geist Mono',monospace">${a.cost?grp(a.cost):'–'}</td><td>${t.length}</td>
+      <td style="font-family:'Geist Mono',monospace;cursor:pointer" title="Click to edit the cost" onclick="setCost(${a.id})">${a.cost?grp(a.cost):'+ add'}</td><td>${t.length}</td>
       <td style="font-family:'Geist Mono',monospace;font-weight:700;color:${p>=0?'var(--green)':'var(--red)'}">${fmt(p)}</td>
       <td style="font-family:'Geist Mono',monospace;color:${ev>=0?'var(--green)':'var(--red)'}">${t.length?(ev>=0?'+':'')+ev.toFixed(2)+'R':'–'}</td>
       <td style="font-family:'Geist Mono',monospace">${po?fmt(po):'–'}</td><td style="font-family:'Geist Mono',monospace;font-weight:700;color:${rp>=0?'var(--green)':'var(--red)'}">${po||fe||a.cost?fmt(rp):'–'}</td><td>${t.length?Math.round(w/t.length*100)+'%':'–'}</td>
@@ -658,7 +658,7 @@ function renderExtras(){
   const last=[...t].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,100);
   const wins=t.filter(x=>Number(x.pnl)>0),miss=wins.filter(x=>!Number(x.rr)).length;
   const rc=(l,v,sub)=>`<div class="stat-card"><div class="stat-label">${l}</div><div class="stat-val ${v>=0?'g':'r'}">${(v>=0?'+':'')+v.toFixed(2)}R</div><div style="font-size:10px;color:var(--text3);margin-top:3px">${sub}</div></div>`;
-  document.getElementById('r-stats').innerHTML=rc('Total R',R(t),t.length+' trades')+rc('EV / trade',ev(t),'all selected trades')+rc('EV last '+last.length,ev(last),'most recent trades')+rc('Avg win R',wins.length?R(wins)/wins.length:0,wins.length+' winners')+`<div style="grid-column:1/-1;font-size:11px;color:var(--text3)">Loss = −1R, win = its R:R value${miss?'. '+miss+' winning trades have no R:R and count as 0R':''}.</div>`;
+  document.getElementById('r-stats').innerHTML=rc('Total R',R(t),t.length+(t.length===1?' trade':' trades'))+rc('EV / trade',ev(t),'all selected trades')+rc('EV last 100',ev(last),last.length+(last.length===1?' trade':' trades'))+rc('Avg win R',wins.length?R(wins)/wins.length:0,wins.length+(wins.length===1?' winner':' winners'))+`<div style="grid-column:1/-1;font-size:11px;color:var(--text3)">Loss = −1R, win = its R:R value${miss?'. '+miss+' winning trades have no R:R and count as 0R':''}.</div>`;
   const by={};t.forEach(x=>{const o=by[x.symbol]=by[x.symbol]||{p:0,n:0,w:0};o.p+=Number(x.pnl);o.n++;if(Number(x.pnl)>0)o.w++;});
   const arr=Object.entries(by).map(([k,v])=>({k,...v})),mx=Math.max(1,...arr.map(a=>Math.abs(a.p)));
   const row=(a,c)=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between"><span style="color:var(--text);font-weight:500">${esc(a.k)}</span><span style="font-family:'Geist Mono',monospace;color:${c}">${fmt(a.p)}</span></div><div style="height:5px;background:var(--surface3);border-radius:3px;margin:6px 0 4px"><div style="height:5px;border-radius:3px;background:${c};width:${Math.abs(a.p)/mx*100}%"></div></div><div style="font-size:11px;color:var(--text3)">${a.n} trade${a.n>1?'s':''} · ${Math.round(a.w/a.n*100)}% win rate</div></div>`;
@@ -875,18 +875,11 @@ function renderPnlChart(){
   const wk=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],vals=days.map(d=>byDay[d]||0);let c=0;const cum=vals.map(v=>(c+=v));
   const labels=days.map(d=>dr.range==='7D'?wk[(new Date(d+'T00:00:00').getDay()+6)%7]:d.slice(5));
   const ctx=document.getElementById('pnl-chart');if(!ctx)return;if(pnlChart)pnlChart.destroy();
-  const tick={color:'#5f626a',font:{size:10},maxRotation:0,autoSkip:true};
+  const tick={color:'#8d919a',font:{size:10},maxRotation:0,autoSkip:true};
   pnlChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[
-    {type:'line',data:cum,borderColor:'#9a9da4',borderWidth:1.5,pointRadius:0,tension:.3,yAxisID:'y1',order:0},
+    
     {data:vals,backgroundColor:vals.map(v=>v>=0?'rgba(61,214,140,.75)':'rgba(240,97,109,.75)'),borderRadius:3,maxBarThickness:34,order:1}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:tick},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:tick},y1:{position:'right',grid:{display:false},ticks:tick}}}});
-}
-function renderReal(){
-  const t=dvt(),A=accounts.filter(a=>selAccs.has(a.id)),cs=cash.filter(c=>selAccs.has(c.account)&&inRange(c.date,dr));
-  const po=cs.filter(c=>c.kind==='payout').reduce((s,c)=>s+c.amount,0),fe=cs.filter(c=>c.kind==='fee').reduce((s,c)=>s+c.amount,0);
-  const ac=A.filter(a=>inRange(isoL(new Date(a.id)),dr)).reduce((s,a)=>s+(a.cost||0),0),sp=fe+ac,net=po-sp,tp=t.reduce((s,x)=>s+Number(x.pnl),0);
-  const c=(l,v,col,sub)=>`<div class="stat-card"><div class="stat-label">${l}</div><div class="stat-val" style="color:${col}">${v}</div><div style="font-size:10px;color:var(--text3);margin-top:3px">${sub}</div></div>`;
-  document.getElementById('real-stats').innerHTML=c('Payouts (real)','+'+grp(po),'var(--green)','money withdrawn')+c('Spent','-'+grp(sp),'var(--red)','accounts '+grp(ac)+' · fees '+grp(fe))+c('Net real profit',(net<0?'-':'+')+grp(net),net>=0?'var(--green)':'var(--red)','payouts − spent')+c('Trading PnL',fmt(tp),tp>=0?'var(--green)':'var(--red)',t.length+' trades, incl. evaluation')+`<div style="grid-column:1/-1;font-size:11px;color:var(--text3)">Trading PnL counts every trade, including evaluation profit that is not withdrawable. Real profit = payouts minus what you spent on accounts and fees. Account cost is counted on the day the account was added.</div>`;
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:tick},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:tick}}}});
 }
 function selVariant(turbo){selAccs=new Set(accounts.filter(a=>a.prop&&!!a.turbo===turbo).map(a=>a.id));saveSel();refreshAll();}
 async function addAccount(){
@@ -907,7 +900,19 @@ function jZoom(src){
   const im=new Image();im.src=src;im.style.cssText='max-width:96vw;max-height:94vh;border-radius:8px';o.append(im);o.onclick=()=>o.remove();document.body.append(o);
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.zoomov').forEach(x=>x.remove());});
-window.addEventListener('scroll',()=>document.querySelectorAll('.cs-m').forEach(x=>x.style.display='none'),true);
+window.addEventListener('scroll',e=>{if(e.target&&e.target.closest&&e.target.closest('.cs-m'))return;document.querySelectorAll('.cs-m').forEach(x=>x.style.display='none');},true);
+async function setCost(id){
+  const a=accounts.find(x=>x.id===id),v=prompt('Cost of this account in USD (leave empty for none)',a.cost||'');
+  if(v===null)return;const n=parseFloat(String(v).replace(',','.').replace(/\s/g,'')),old=a.cost;
+  a.cost=isNaN(n)?null:n;if(!await saveAccount(a))a.cost=old;refreshAll();
+}
+function renderReal(){
+  const t=dvt(),A=accounts.filter(a=>selAccs.has(a.id)),cs=cash.filter(c=>selAccs.has(c.account));
+  const po=cs.filter(c=>c.kind==='payout').reduce((s,c)=>s+c.amount,0),fe=cs.filter(c=>c.kind==='fee').reduce((s,c)=>s+c.amount,0),ac=A.reduce((s,a)=>s+(a.cost||0),0);
+  const sp=fe+ac,net=po-sp,tp=t.reduce((s,x)=>s+Number(x.pnl),0),n=t.length;
+  const c=(l,v,col,sub)=>`<div class="stat-card"><div class="stat-label">${l}</div><div class="stat-val" style="color:${col}">${v}</div><div style="font-size:10px;color:var(--text3);margin-top:3px">${sub}</div></div>`;
+  document.getElementById('real-stats').innerHTML=c('Payouts (real)',po?'+'+grp(po):'0.00',po?'var(--green)':'var(--text2)','money withdrawn')+c('Spent',sp?'-'+grp(sp):'0.00',sp?'var(--red)':'var(--text2)','accounts '+grp(ac)+' · fees '+grp(fe))+c('Net real profit',net?(net<0?'-':'+')+grp(net):'0.00',net>0?'var(--green)':net<0?'var(--red)':'var(--text2)','payouts − spent')+c('Trading PnL',fmt(tp),tp>=0?'var(--green)':'var(--red)',n+(n===1?' trade':' trades')+' in range')+`<div style="grid-column:1/-1;font-size:11px;color:var(--text3)">Payouts, Spent and Net real profit are all-time for the ticked accounts. Trading PnL follows the date range above and includes evaluation profit that is not withdrawable.</div>`;
+}
 function toggleAccPanel(e){e.stopPropagation();const p=document.getElementById('acc-panel');p.style.display=p.style.display==='none'?'block':'none';}
 document.addEventListener('click',e=>{const p=document.getElementById('acc-panel');if(p&&!e.composedPath().includes(p))p.style.display='none';});
 
@@ -1006,8 +1011,8 @@ function renderDashboard(){
   document.getElementById('stats').innerHTML=`
     <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val a">${wr}%</div></div>
     <div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val">${gL?(gW/gL).toFixed(2):'∞'}</div><div style="font-size:10px;color:var(--text3);margin-top:3px">total wins ÷ total losses</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Winner</div><div class="stat-val g">${fmt(avgW)}</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Loser</div><div class="stat-val r">${fmt(avgL)}</div></div>`;
+    <div class="stat-card"><div class="stat-label">Avg Winner</div><div class="stat-val g">${wins.length?fmt(avgW):'–'}</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Loser</div><div class="stat-val r">${losses.length?fmt(avgL):'–'}</div></div>`;
   const recent=[...dvt()].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
   document.getElementById('recent-trades').innerHTML=recent.length?recent.map(x=>`<tr class="clickable" onclick="openModal(${x.id})">
     <td>${fmtDate(x.date)}</td><td style="color:var(--text);font-weight:500">${x.symbol}</td>
