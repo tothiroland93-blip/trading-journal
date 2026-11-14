@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trade Log</title>
+<title>EldazzJ</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f2a20'/%3E%3Cpath d='M7 21l6-6 4 4 8-9' fill='none' stroke='%233dd68c' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -183,6 +184,10 @@ input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:po
 .cs-b::after{content:'';position:absolute;right:14px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--text3);border-bottom:1.5px solid var(--text3);transform:translateY(-70%) rotate(45deg)}
 .cs-m{display:none;position:absolute;left:0;top:calc(100% + 4px);min-width:100%;max-height:260px;overflow:auto;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:4px;z-index:80;box-shadow:0 12px 30px rgba(0,0,0,.5)}
 .cs-o{padding:8px 12px;border-radius:7px;cursor:pointer;color:var(--text2);font-size:13px;white-space:nowrap}.cs-o:hover{background:var(--surface3);color:var(--text)}.cs-o.on{color:var(--green)}
+
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Geist',sans-serif;font-size:16px;font-weight:600;color:var(--text);letter-spacing:.01em;margin-right:0}
+.lock-logo{display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Geist',sans-serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:8px}
+.jd-img{cursor:zoom-in}
 canvas{max-width:100%}
 @media(max-width:600px){.form-grid,.modal-grid{grid-template-columns:1fr}.stat-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -191,7 +196,7 @@ canvas{max-width:100%}
 
 <div id="lock-screen">
   <div class="lock-box">
-    <div class="lock-logo">// TRADE_LOG</div>
+    <div class="lock-logo"><svg width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0f2a20"/><path d="M7 21l6-6 4 4 8-9" fill="none" stroke="#3dd68c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="10" r="2" fill="#3dd68c"/></svg><span>EldazzJ</span></div>
     <div class="lock-sub">Sign in to your journal</div>
     <input class="lock-input" type="email" id="lock-email" placeholder="email" autocomplete="username" style="letter-spacing:0">
     <input class="lock-input" type="password" id="lock-input" placeholder="••••••••">
@@ -203,7 +208,7 @@ canvas{max-width:100%}
 
 <div class="app" id="main-app">
 <nav>
-  <div class="nav-logo">// TRADE_LOG</div>
+  <div class="nav-logo"><svg width="26" height="26" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0f2a20"/><path d="M7 21l6-6 4 4 8-9" fill="none" stroke="#3dd68c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="10" r="2" fill="#3dd68c"/></svg><span>EldazzJ</span></div>
   <div class="nav-sec" style="margin-top:0">Overview</div>
   <button class="nav-btn" onclick="nav('accounts',this)"><svg class="ico" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h12v4"/><path d="M3 7v10a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-3"/><path d="M21 9h-5a2 2 0 0 0 0 4h5z"/></svg> Accounts</button>
   <button class="nav-btn active" onclick="nav('dashboard',this)"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</button>
@@ -224,7 +229,8 @@ canvas{max-width:100%}
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
       <div class="fg" style="flex:1;min-width:200px"><label>Name</label><input id="acc-new" placeholder="e.g. FTMO 100k, HL main" onkeydown="if(event.key==='Enter')addAccount()"></div>
       <label style="display:flex;gap:8px;align-items:center;color:var(--text);padding-bottom:10px;cursor:pointer"><input type="checkbox" id="acc-prop" onchange="accFormToggle()"> Prop firm account</label>
-      <div class="fg" id="acc-size-box" style="display:none;min-width:130px"><label>Size (optional)</label><select id="acc-size"><option value="">–</option><option value="10">10k</option><option value="25">25k</option><option value="50">50k</option><option value="100">100k</option><option value="200">200k</option></select></div>
+      <div class="fg" id="acc-size-box" style="display:none;min-width:150px"><label>Size (optional)</label><select id="acc-size"><option value="">–</option><option value="10">10k</option><option value="25">25k</option><option value="50">50k</option><option value="100">100k</option><option value="200">200k</option><option value="10t">10k Turbo</option><option value="25t">25k Turbo</option><option value="50t">50k Turbo</option><option value="100t">100k Turbo</option><option value="200t">200k Turbo</option></select></div>
+      <div class="fg" style="min-width:150px"><label>Cost (USD, optional)</label><input type="number" id="acc-cost" step="any" placeholder="0"></div>
       <div class="fg" id="acc-plat-box" style="min-width:170px"><label>Platform</label><input id="acc-plat" placeholder="HL, Risex..."></div>
       <button class="btn btn-accent" onclick="addAccount()">+ Add account</button>
     </div>
@@ -234,8 +240,11 @@ canvas{max-width:100%}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
       <button class="btn" onclick="selAll(true)">Select all</button>
       <button class="btn" onclick="selAll(false)">Unselect all</button>
+      <button class="btn" onclick="selVariant(false)">Standard only</button>
+      <button class="btn" onclick="selVariant(true)">Turbo only</button>
     </div>
-    <div class="tbl-wrap"><table><thead><tr><th></th><th>Name</th><th>Type</th><th>Status</th><th>Trades</th><th>Trading PnL</th><th>EV (R)</th><th>Payouts</th><th>Real P/L</th><th>Win rate</th><th></th></tr></thead><tbody id="acc-body"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th></th><th>Name</th><th>Type</th><th>Status</th><th>Cost</th><th>Trades</th><th>Trading PnL</th><th>EV (R)</th><th>Payouts</th><th>Real P/L</th><th>Win rate</th><th></th></tr></thead><tbody id="acc-body"></tbody></table></div>
+    <div id="cmp" style="margin-top:18px"></div>
   </div>
   <div class="card">
     <div class="card-title">Payouts &amp; fees — real money. Only payouts count as real profit, evaluation profit does not.</div>
@@ -252,6 +261,7 @@ canvas{max-width:100%}
 
 <!-- DASHBOARD -->
 <div id="page-dashboard" class="page active">
+  <div id="dash-bar" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
   <div class="stat-grid" id="real-stats"></div>
   <div class="stat-grid" id="stats"></div>
   <div class="stat-grid" id="r-stats"></div>
@@ -262,7 +272,7 @@ canvas{max-width:100%}
     </tr></thead><tbody id="recent-trades"></tbody></table></div>
   </div>
   <div class="card">
-    <div class="card-title">Daily PnL (bars) and cumulative PnL (line), last 30 days</div>
+    <div class="card-title">Daily PnL (bars) and cumulative PnL (line)</div>
     <div style="height:230px"><canvas id="pnl-chart"></canvas></div>
   </div>
   <div class="card"><div class="card-title">Best setups — ranked by EV (R)</div><div id="best-setups"></div></div>
@@ -440,7 +450,7 @@ function unlock(){
 }
 function offlineMode(){
   offline=true;
-  document.querySelector('.nav-logo').textContent='// LOCAL PREVIEW';
+  document.querySelector('.nav-logo span').textContent='EldazzJ · local';
   loadTrades().then(loadAccounts).then(loadCash).then(unlock);
 }
 async function logout(){if(sb&&!offline)await sb.auth.signOut();location.reload();}
@@ -557,7 +567,7 @@ function saveSel(){try{localStorage.setItem('tj_sel_accs',JSON.stringify([...sel
 function persistAccs(){try{localStorage.setItem('tj_accounts',JSON.stringify(accounts));}catch(e){}}
 async function saveAccount(a){
   if(offline){persistAccs();return true;}
-  const {error}=await sb.from('accounts').upsert({id:a.id,name:a.name,prop:!!a.prop,size:a.size||null,platform:a.platform||'',status:a.status||'active'});
+  const {error}=await sb.from('accounts').upsert({id:a.id,name:a.name,prop:!!a.prop,size:a.size||null,platform:a.platform||'',status:a.status||'active',cost:a.cost||null,turbo:!!a.turbo});
   if(error){alert('Save failed: '+error.message);return false;}
   return true;
 }
@@ -565,7 +575,7 @@ async function loadAccounts(){
   if(offline){try{accounts=JSON.parse(localStorage.getItem('tj_accounts')||'[]');}catch(e){accounts=[];}}
   else{
     const {data,error}=await sb.from('accounts').select('*').order('created_at');
-    if(error){alert('Account load error: '+error.message);accounts=[];}else accounts=data.map(r=>({id:r.id,name:r.name,prop:r.prop,size:r.size,platform:r.platform,status:r.status}));
+    if(error){alert('Account load error: '+error.message);accounts=[];}else accounts=data.map(r=>({id:r.id,name:r.name,prop:r.prop,size:r.size,platform:r.platform,status:r.status,cost:r.cost,turbo:!!r.turbo}));
   }
   accounts.forEach(a=>{a.status=a.status||'active';});
   if(!accounts.length){const a={id:Date.now(),name:'Main account',status:'active'};accounts=[a];await saveAccount(a);}
@@ -602,7 +612,7 @@ async function deleteAccount(id){
 function toggleAcc(id,on){if(on)selAccs.add(id);else selAccs.delete(id);saveSel();refreshAll();}
 function selAll(on){selAccs=new Set(on?accounts.map(a=>a.id):[]);saveSel();refreshAll();}
 function refreshAll(){
-  renderAccBtn();renderAccounts();fillAccSelect();renderCash();
+  renderAccBtn();renderAccounts();renderCompare();fillAccSelect();renderCash();
   renderDashboard();renderJournal();renderCalendar();
 }
 function fillAccSelect(){
@@ -619,14 +629,6 @@ function renderAccBtn(){
 }
 function rOf(t){const p=Number(t.pnl);if(p<0)return -1;if(p>0)return Number(t.rr)||0;return 0;}
 function accFormToggle(){const p=document.getElementById('acc-prop').checked;document.getElementById('acc-size-box').style.display=p?'':'none';document.getElementById('acc-plat-box').style.display=p?'none':'';}
-async function addAccount(){
-  const inp=document.getElementById('acc-new'),name=inp.value.trim();if(!name)return;
-  const prop=document.getElementById('acc-prop').checked;
-  const a={id:Date.now(),name,prop,size:prop?(Number(document.getElementById('acc-size').value)||null):null,platform:prop?'':document.getElementById('acc-plat').value.trim(),status:'active'};
-  accounts.push(a);
-  if(!await saveAccount(a)){accounts.pop();return;}
-  selAccs.add(a.id);saveSel();inp.value='';document.getElementById('acc-plat').value='';document.getElementById('acc-size').value='';refreshAll();
-}
 async function setStatus(id,v){
   const a=accounts.find(x=>x.id===id),old=a.status;a.status=v;
   if(!await saveAccount(a))a.status=old;
@@ -637,22 +639,22 @@ function renderAccounts(){
   const col={active:'var(--text2)',funded:'var(--green)',lost:'var(--red)'};
   b.innerHTML=accounts.map(a=>{
     const t=trades.filter(x=>x.account===a.id),p=t.reduce((s,x)=>s+Number(x.pnl),0),w=t.filter(x=>Number(x.pnl)>0).length;
-    const po=cashSum(new Set([a.id]),'payout'),fe=cashSum(new Set([a.id]),'fee'),rp=po-fe;
+    const po=cashSum(new Set([a.id]),'payout'),fe=cashSum(new Set([a.id]),'fee'),rp=po-fe-(a.cost||0);
     const ev=t.length?t.reduce((s,x)=>s+rOf(x),0)/t.length:0,st=a.status||'active';
-    const type=a.prop?'Prop'+(a.size?' · '+a.size+'k':''):(a.platform?esc(a.platform):'–');
+    const type=a.prop?'Prop'+(a.size?' · '+a.size+'k':'')+(a.turbo?' Turbo':''):(a.platform?esc(a.platform):'–');
     const opt=(v,l)=>`<option value="${v}"${st===v?' selected':''}>${l}</option>`;
     return `<tr><td><input type="checkbox" ${selAccs.has(a.id)?'checked':''} onchange="toggleAcc(${a.id},this.checked)"></td>
       <td style="color:var(--text);font-weight:500">${esc(a.name)}</td><td>${type}</td>
       <td><select onchange="setStatus(${a.id},this.value)" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:${col[st]};padding:4px 6px;font-family:inherit">${opt('active','Active')}${opt('funded','Funded')}${opt('lost','Lost')}</select></td>
-      <td>${t.length}</td>
+      <td style="font-family:'Geist Mono',monospace">${a.cost?grp(a.cost):'–'}</td><td>${t.length}</td>
       <td style="font-family:'Geist Mono',monospace;font-weight:700;color:${p>=0?'var(--green)':'var(--red)'}">${fmt(p)}</td>
       <td style="font-family:'Geist Mono',monospace;color:${ev>=0?'var(--green)':'var(--red)'}">${t.length?(ev>=0?'+':'')+ev.toFixed(2)+'R':'–'}</td>
-      <td style="font-family:'Geist Mono',monospace">${po?fmt(po):'–'}</td><td style="font-family:'Geist Mono',monospace;font-weight:700;color:${rp>=0?'var(--green)':'var(--red)'}">${po||fe?fmt(rp):'–'}</td><td>${t.length?Math.round(w/t.length*100)+'%':'–'}</td>
+      <td style="font-family:'Geist Mono',monospace">${po?fmt(po):'–'}</td><td style="font-family:'Geist Mono',monospace;font-weight:700;color:${rp>=0?'var(--green)':'var(--red)'}">${po||fe||a.cost?fmt(rp):'–'}</td><td>${t.length?Math.round(w/t.length*100)+'%':'–'}</td>
       <td style="white-space:nowrap"><button class="btn-sm" onclick="renameAccount(${a.id})">Rename</button> <button class="btn-sm" onclick="deleteAccount(${a.id})">Delete</button></td></tr>`;
   }).join('');
 }
 function renderExtras(){
-  const t=vt(),R=x=>x.reduce((s,y)=>s+rOf(y),0),ev=x=>x.length?R(x)/x.length:0;
+  const t=dvt(),R=x=>x.reduce((s,y)=>s+rOf(y),0),ev=x=>x.length?R(x)/x.length:0;
   const last=[...t].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,100);
   const wins=t.filter(x=>Number(x.pnl)>0),miss=wins.filter(x=>!Number(x.rr)).length;
   const rc=(l,v,sub)=>`<div class="stat-card"><div class="stat-label">${l}</div><div class="stat-val ${v>=0?'g':'r'}">${(v>=0?'+':'')+v.toFixed(2)}R</div><div style="font-size:10px;color:var(--text3);margin-top:3px">${sub}</div></div>`;
@@ -752,7 +754,7 @@ function jDetail(){
   if(!t){el.innerHTML='<div class="jd-empty"><div>Pick a trade to review it</div><small>You will see its screenshot, and can tag the setup, the mistakes and write down what happened.</small></div>';return;}
   const p=Number(t.pnl),r=rOf(t);jr.SL=setupList();
   el.innerHTML=`<div class="jd-card jd-sticky"><div class="jd-top"><div style="display:flex;gap:10px;align-items:center"><b style="font-size:17px">${esc(t.symbol)}</b><span class="dr ${t.direction==='Long'?'dl':'ds'}">${t.direction.toUpperCase()}</span><span class="mt" style="flex:none">${accName(t)}</span></div><div style="display:flex;gap:12px;align-items:center"><b class="mono ${p>=0?'g':'r'}" style="font-size:18px">${fmtUsd(p)}</b><span class="mono ${r>=0?'g':'r'}">${r>=0?'+':''}${r.toFixed(2)}R</span><span class="mt" style="flex:none">${i+1} / ${L.length}</span><button class="sq" onclick="jStep(-1)">‹</button><button class="sq" onclick="jStep(1)">›</button></div></div>
-  ${t.img?`<img src="${t.img}" class="jd-img">`:'<div class="jd-noimg">No screenshot attached</div>'}<div style="margin-top:8px"><label class="btn" style="cursor:pointer;display:inline-block">${t.img?'Replace screenshot':'+ Upload screenshot'}<input type="file" accept="image/*" style="display:none" onchange="jShot(this)"></label></div>
+  ${t.img?`<img src="${t.img}" class="jd-img" onclick="jZoom(this.src)" title="Click to enlarge">`:'<div class="jd-noimg">No screenshot attached</div>'}<div style="margin-top:8px"><label class="btn" style="cursor:pointer;display:inline-block">${t.img?'Replace screenshot':'+ Upload screenshot'}<input type="file" accept="image/*" style="display:none" onchange="jShot(this)"></label></div>
   <div class="jd-stats">${[['Entry',t.entry||'–'],['Exit',t.exit||'–'],['R:R',t.rr||'–'],['Held',fmtDur(t.duration)||'–'],['Result',(r>=0?'+':'')+r.toFixed(2)+'R']].map(x=>`<div><small>${x[0]}</small><div class="mono">${x[1]}</div></div>`).join('')}</div>
   <div class="jd-line">${(t.date||'').replace('T',' ')} @ ${t.entry||'–'} → exit ${t.exit||'–'}</div>
   <div class="jd-h">Setup</div><div class="chips">${jr.SL.map((n,k)=>`<button class="chip${t.setup===n?' on':''}" onclick="jSetup(${k})">${esc(n)}</button>`).join('')}<button class="chip" onclick="jOwn()">+ Own</button></div>
@@ -795,7 +797,8 @@ function enhanceSelect(sel){
     m.innerHTML='';
     [...sel.options].forEach((o,i)=>{const d=document.createElement('div');d.className='cs-o'+(i===sel.selectedIndex?' on':'');d.textContent=o.text;
       d.onclick=ev=>{ev.stopPropagation();sel.selectedIndex=i;m.style.display='none';lab();sel.dispatchEvent(new Event('change',{bubbles:true}));};m.append(d);});
-    m.style.display='block';
+    const r=b.getBoundingClientRect();m.style.position='fixed';m.style.left=r.left+'px';m.style.minWidth=r.width+'px';m.style.display='block';
+    const h=m.offsetHeight;m.style.top=(r.bottom+h+8>innerHeight&&r.top>h?r.top-h-4:r.bottom+4)+'px';
   };
 }
 const csScan=()=>document.querySelectorAll('select:not([data-cs])').forEach(enhanceSelect);
@@ -838,27 +841,73 @@ function jCopy(k){const t=jCur(),n=copyList()[k];t.copy=t.copy===n?'':n;jSave(t)
 function jCopyOwn(){const n=prompt('Name');if(!n||!n.trim())return;const t=jCur();t.copy=n.trim();jSave(t);jList2();}
 function jShot(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=async e=>{const t=jCur();t.img=e.target.result;await jSave(t);jDetail();};r.readAsDataURL(f);}
 
-function renderPnlChart(){
-  const byDay={};vt().forEach(t=>{const d=fmtDate(t.date);byDay[d]=(byDay[d]||0)+Number(t.pnl);});
-  const days=Object.keys(byDay).sort().slice(-30),vals=days.map(d=>byDay[d]);let c=0;const cum=vals.map(v=>(c+=v));
-  const ctx=document.getElementById('pnl-chart');if(!ctx)return;if(pnlChart)pnlChart.destroy();
-  const tick={color:'#5f626a',font:{size:10}};
-  pnlChart=new Chart(ctx,{type:'bar',data:{labels:days.map(d=>d.slice(5)),datasets:[
-    {type:'line',data:cum,borderColor:'#9a9da4',borderWidth:1.5,pointRadius:0,tension:.3,yAxisID:'y1',order:0},
-    {data:vals,backgroundColor:vals.map(v=>v>=0?'rgba(61,214,140,.75)':'rgba(240,97,109,.75)'),borderRadius:3,maxBarThickness:22,order:1}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:tick},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:tick},y1:{position:'right',grid:{display:false},ticks:tick}}}});
-}
-function renderReal(){
-  const po=cashSum(selAccs,'payout'),fe=cashSum(selAccs,'fee'),net=po-fe,t=vt(),tp=t.reduce((s,x)=>s+Number(x.pnl),0);
-  const c=(l,v,col,sub)=>`<div class="stat-card"><div class="stat-label">${l}</div><div class="stat-val" style="color:${col}">${v}</div><div style="font-size:10px;color:var(--text3);margin-top:3px">${sub}</div></div>`;
-  document.getElementById('real-stats').innerHTML=c('Payouts (real)','+'+grp(po),'var(--green)','money withdrawn')+c('Fees','-'+grp(fe),'var(--red)','challenges / resets')+c('Net real profit',(net<0?'-':'+')+grp(net),net>=0?'var(--green)':'var(--red)','payouts − fees')+c('Trading PnL',fmt(tp),tp>=0?'var(--green)':'var(--red)',t.length+' trades, incl. evaluation')+`<div style="grid-column:1/-1;font-size:11px;color:var(--text3)">Trading PnL counts every trade, including evaluation profit that is not withdrawable. Only payouts are real profit.</div>`;
-}
 function renderBest(){
-  const by={};vt().forEach(t=>{if(!t.setup)return;const o=by[t.setup]=by[t.setup]||{n:0,w:0,p:0,r:0};o.n++;if(Number(t.pnl)>0)o.w++;o.p+=Number(t.pnl);o.r+=rOf(t);});
+  const by={};dvt().forEach(t=>{if(!t.setup)return;const o=by[t.setup]=by[t.setup]||{n:0,w:0,p:0,r:0};o.n++;if(Number(t.pnl)>0)o.w++;o.p+=Number(t.pnl);o.r+=rOf(t);});
   const rows=Object.entries(by).map(([k,o])=>({k,...o,ev:o.r/o.n})).sort((a,b)=>b.ev-a.ev).slice(0,4);
   document.getElementById('best-setups').innerHTML=rows.length?'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">'+rows.map((x,i)=>`<div class="hab" style="${i===0?'border-color:var(--green)':''}"><div class="hab-t">${i===0?'★ Best setup':'#'+(i+1)}</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">${esc(x.k)}</div><div class="mono ${x.ev>=0?'g':'r'}" style="font-size:16px">${x.ev>=0?'+':''}${x.ev.toFixed(2)}R <small style="color:var(--text3)">EV</small></div><div style="font-size:11px;color:var(--text3);margin-top:4px">${x.n} trades · ${Math.round(x.w/x.n*100)}% wr · ${fmtUsd(x.p)}</div></div>`).join('')+'</div>':'<div style="color:var(--text3)">Tag your trades with a setup to see which one works best.</div>';
 }
 csScan();fSetupRender();
+// ── V4 ADDITIONS ─────────────────────────────────────────
+const isoL=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+let dr={range:'7D',from:'',to:'',market:''};
+function inRange(d,st){
+  const ago=k=>{const x=new Date();x.setDate(x.getDate()-(k-1));return isoL(x);};
+  if(st.range==='7D')return d>=ago(7);if(st.range==='30D')return d>=ago(30);if(st.range==='90D')return d>=ago(90);
+  if(st.range==='YTD')return d>=new Date().getFullYear()+'-01-01';
+  if(st.range==='Custom')return(!st.from||d>=st.from)&&(!st.to||d<=st.to);
+  return true;
+}
+function dvt(){return vt().filter(t=>inRange(fmtDate(t.date),dr)&&(!dr.market||t.market===dr.market));}
+function dRange(v){dr.range=v;renderDashboard();}function dMarket(v){dr.market=v;renderDashboard();}
+function dBar(){
+  const el=document.getElementById('dash-bar');if(!el)return;
+  el.innerHTML=seg([['all','All'],['7D','7D'],['30D','30D'],['90D','90D'],['YTD','YTD'],['Custom','Custom']],dr.range,'dRange')+seg([['','All markets'],['Crypto','Crypto'],['TradFi','TradFi']],dr.market,'dMarket')+(dr.range==='Custom'?`<input type="date" class="jin" value="${dr.from}" onchange="dr.from=this.value;renderDashboard()"><input type="date" class="jin" value="${dr.to}" onchange="dr.to=this.value;renderDashboard()">`:'');
+}
+function renderPnlChart(){
+  const byDay={};dvt().forEach(t=>{const d=fmtDate(t.date);byDay[d]=(byDay[d]||0)+Number(t.pnl);});
+  const keys=Object.keys(byDay).sort(),today=isoL(new Date());
+  const back=k=>{const x=new Date();x.setDate(x.getDate()-(k-1));return isoL(x);};
+  let start=keys[0]||today,end=today;
+  if(dr.range==='7D')start=back(7);else if(dr.range==='30D')start=back(30);else if(dr.range==='90D')start=back(90);
+  else if(dr.range==='YTD')start=new Date().getFullYear()+'-01-01';
+  else if(dr.range==='Custom'){start=dr.from||start;end=dr.to||today;}
+  const days=[];for(let d=new Date(start+'T00:00:00');isoL(d)<=end&&days.length<800;d.setDate(d.getDate()+1))days.push(isoL(d));
+  const wk=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],vals=days.map(d=>byDay[d]||0);let c=0;const cum=vals.map(v=>(c+=v));
+  const labels=days.map(d=>dr.range==='7D'?wk[(new Date(d+'T00:00:00').getDay()+6)%7]:d.slice(5));
+  const ctx=document.getElementById('pnl-chart');if(!ctx)return;if(pnlChart)pnlChart.destroy();
+  const tick={color:'#5f626a',font:{size:10},maxRotation:0,autoSkip:true};
+  pnlChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[
+    {type:'line',data:cum,borderColor:'#9a9da4',borderWidth:1.5,pointRadius:0,tension:.3,yAxisID:'y1',order:0},
+    {data:vals,backgroundColor:vals.map(v=>v>=0?'rgba(61,214,140,.75)':'rgba(240,97,109,.75)'),borderRadius:3,maxBarThickness:34,order:1}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:tick},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:tick},y1:{position:'right',grid:{display:false},ticks:tick}}}});
+}
+function renderReal(){
+  const t=dvt(),A=accounts.filter(a=>selAccs.has(a.id)),cs=cash.filter(c=>selAccs.has(c.account)&&inRange(c.date,dr));
+  const po=cs.filter(c=>c.kind==='payout').reduce((s,c)=>s+c.amount,0),fe=cs.filter(c=>c.kind==='fee').reduce((s,c)=>s+c.amount,0);
+  const ac=A.filter(a=>inRange(isoL(new Date(a.id)),dr)).reduce((s,a)=>s+(a.cost||0),0),sp=fe+ac,net=po-sp,tp=t.reduce((s,x)=>s+Number(x.pnl),0);
+  const c=(l,v,col,sub)=>`<div class="stat-card"><div class="stat-label">${l}</div><div class="stat-val" style="color:${col}">${v}</div><div style="font-size:10px;color:var(--text3);margin-top:3px">${sub}</div></div>`;
+  document.getElementById('real-stats').innerHTML=c('Payouts (real)','+'+grp(po),'var(--green)','money withdrawn')+c('Spent','-'+grp(sp),'var(--red)','accounts '+grp(ac)+' · fees '+grp(fe))+c('Net real profit',(net<0?'-':'+')+grp(net),net>=0?'var(--green)':'var(--red)','payouts − spent')+c('Trading PnL',fmt(tp),tp>=0?'var(--green)':'var(--red)',t.length+' trades, incl. evaluation')+`<div style="grid-column:1/-1;font-size:11px;color:var(--text3)">Trading PnL counts every trade, including evaluation profit that is not withdrawable. Real profit = payouts minus what you spent on accounts and fees. Account cost is counted on the day the account was added.</div>`;
+}
+function selVariant(turbo){selAccs=new Set(accounts.filter(a=>a.prop&&!!a.turbo===turbo).map(a=>a.id));saveSel();refreshAll();}
+async function addAccount(){
+  const inp=document.getElementById('acc-new'),name=inp.value.trim();if(!name)return;
+  const prop=document.getElementById('acc-prop').checked,sv=document.getElementById('acc-size').value,cost=parseFloat(document.getElementById('acc-cost').value);
+  const a={id:Date.now(),name,prop,size:prop?(parseInt(sv)||null):null,turbo:prop&&/t$/.test(sv),platform:prop?'':document.getElementById('acc-plat').value.trim(),cost:isNaN(cost)?null:cost,status:'active'};
+  accounts.push(a);if(!await saveAccount(a)){accounts.pop();return;}
+  selAccs.add(a.id);saveSel();inp.value='';['acc-plat','acc-cost'].forEach(i=>document.getElementById(i).value='');document.getElementById('acc-size').selectedIndex=0;refreshAll();
+}
+function renderCompare(){
+  const el=document.getElementById('cmp');if(!el)return;
+  const g=turbo=>{const A=accounts.filter(a=>a.prop&&!!a.turbo===turbo),ids=new Set(A.map(a=>a.id)),T=trades.filter(t=>ids.has(t.account)),w=T.filter(t=>Number(t.pnl)>0).length,p=T.reduce((s,t)=>s+Number(t.pnl),0),r=T.reduce((s,t)=>s+rOf(t),0),po=cashSum(ids,'payout'),sp=cashSum(ids,'fee')+A.reduce((s,a)=>s+(a.cost||0),0);return{n:A.length,t:T.length,wr:T.length?Math.round(w/T.length*100)+'%':'–',p,ev:T.length?r/T.length:0,po,sp,net:po-sp};};
+  const col=v=>v>=0?'g':'r';
+  el.innerHTML='<div class="hab-t">Prop firm accounts: Standard vs Turbo</div><table class="pt"><thead><tr><th>Type</th><th>Accounts</th><th>Trades</th><th>Win rate</th><th>Trading PnL</th><th>EV (R)</th><th>Payouts</th><th>Spent</th><th>Net real</th></tr></thead><tbody>'+[['Standard',g(false)],['Turbo',g(true)]].map(([k,x])=>`<tr><td style="color:var(--text)"><b>${k}</b></td><td>${x.n}</td><td>${x.t}</td><td>${x.wr}</td><td class="mono ${col(x.p)}">${fmt(x.p)}</td><td class="mono ${col(x.ev)}">${x.t?(x.ev>=0?'+':'')+x.ev.toFixed(2)+'R':'–'}</td><td class="mono">${grp(x.po)}</td><td class="mono">${grp(x.sp)}</td><td class="mono ${col(x.net)}"><b>${fmt(x.net)}</b></td></tr>`).join('')+'</tbody></table>';
+}
+function jZoom(src){
+  const o=document.createElement('div');o.className='zoomov';o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:20px';
+  const im=new Image();im.src=src;im.style.cssText='max-width:96vw;max-height:94vh;border-radius:8px';o.append(im);o.onclick=()=>o.remove();document.body.append(o);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.zoomov').forEach(x=>x.remove());});
+window.addEventListener('scroll',()=>document.querySelectorAll('.cs-m').forEach(x=>x.style.display='none'),true);
 function toggleAccPanel(e){e.stopPropagation();const p=document.getElementById('acc-panel');p.style.display=p.style.display==='none'?'block':'none';}
 document.addEventListener('click',e=>{const p=document.getElementById('acc-panel');if(p&&!e.composedPath().includes(p))p.style.display='none';});
 
@@ -948,7 +997,7 @@ async function runAI(imageData,symbol,direction,setup,entry,exit,pnl,outputEl){
 
 // ── DASHBOARD ─────────────────────────────────────────────
 function renderDashboard(){
-  const t=vt(),total=t.reduce((a,x)=>a+Number(x.pnl),0);
+  const t=dvt(),total=t.reduce((a,x)=>a+Number(x.pnl),0);
   const wins=t.filter(x=>Number(x.pnl)>0),losses=t.filter(x=>Number(x.pnl)<0);
   const wr=t.length?Math.round(wins.length/t.length*100):0;
   const avgW=wins.length?wins.reduce((a,x)=>a+Number(x.pnl),0)/wins.length:0;
@@ -956,10 +1005,10 @@ function renderDashboard(){
   const gW=wins.reduce((a,x)=>a+Number(x.pnl),0),gL=Math.abs(losses.reduce((a,x)=>a+Number(x.pnl),0));
   document.getElementById('stats').innerHTML=`
     <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-val a">${wr}%</div></div>
-    <div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val">${gL?(gW/gL).toFixed(2):'∞'}</div></div>
+    <div class="stat-card"><div class="stat-label">Profit Factor</div><div class="stat-val">${gL?(gW/gL).toFixed(2):'∞'}</div><div style="font-size:10px;color:var(--text3);margin-top:3px">total wins ÷ total losses</div></div>
     <div class="stat-card"><div class="stat-label">Avg Winner</div><div class="stat-val g">${fmt(avgW)}</div></div>
     <div class="stat-card"><div class="stat-label">Avg Loser</div><div class="stat-val r">${fmt(avgL)}</div></div>`;
-  const recent=[...vt()].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  const recent=[...dvt()].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
   document.getElementById('recent-trades').innerHTML=recent.length?recent.map(x=>`<tr class="clickable" onclick="openModal(${x.id})">
     <td>${fmtDate(x.date)}</td><td style="color:var(--text);font-weight:500">${x.symbol}</td>
     <td><span class="badge ${x.direction==='Long'?'b-long':'b-short'}">${x.direction}</span></td>
@@ -967,7 +1016,7 @@ function renderDashboard(){
     <td style="font-family:'Geist Mono',monospace;font-weight:700;color:${Number(x.pnl)>=0?'var(--green)':'var(--red)'}">${fmt(x.pnl)}</td>
     <td><span class="badge ${Number(x.pnl)>=0?'b-win':'b-loss'}">${Number(x.pnl)>=0?'Win':'Loss'}</span></td>
   </tr>`).join(''):`<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:2rem">No trades yet.</td></tr>`;
-  renderPnlChart();renderExtras();renderReal();renderBest();
+  dBar();renderPnlChart();renderExtras();renderReal();renderBest();
 }
 
 // ── ADD TRADE ─────────────────────────────────────────────
@@ -1013,20 +1062,21 @@ function renderCalendar(){
   document.getElementById('cal-header').innerHTML=['Mon','Tue','Wed','Thu','Fri','Sat','Sun','Week'].map(h=>`<div class="cal-hdr">${h}</div>`).join('');
   const firstDay=new Date(calYear,calMonth,1).getDay(),offset=firstDay===0?6:firstDay-1;
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate(),today=new Date().toISOString().slice(0,10);
-  let html='',weekPnl=0,weekHas=false,cellsInRow=0;
+  const payByDay={};cash.filter(c=>c.kind==='payout'&&selAccs.has(c.account)).forEach(c=>{payByDay[c.date]=(payByDay[c.date]||0)+c.amount;});
+  let html='',weekPnl=0,weekPay=0,weekHas=false,cellsInRow=0;
   for(let i=0;i<offset;i++){html+='<div class="cal-day empty"></div>';cellsInRow++;}
   for(let d=1;d<=daysInMonth;d++){
     const key=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const day=byDay[key];
-    if(day){weekPnl+=day.pnl;weekHas=true;}
+    if(day){weekPnl+=day.pnl;weekHas=true;}weekPay+=payByDay[key]||0;
     html+=`<div class="cal-day ${day?(day.pnl>=0?'pos':'neg'):''} ${key===today?'today-cell':''} ${key===selectedDay?'selected':''}" onclick="selectDay('${key}')">
       <div class="day-num">${d}</div>
       ${day?`<div class="day-pnl ${day.pnl>=0?'g':'r'}">${fmt(day.pnl)}</div><div class="day-cnt">${day.count} trade${day.count>1?'s':''}</div>`:''}
     </div>`;
     cellsInRow++;
     if(new Date(calYear,calMonth,d).getDay()===0||d===daysInMonth){
-      html+=`<div class="cal-day week-total"><div class="day-num" style="color:var(--accent)">WEEK</div>${weekHas?`<div class="day-pnl ${weekPnl>=0?'g':'r'}" style="font-size:12px">${fmt(weekPnl)}</div>`:'<div style="font-size:11px;color:var(--text3);margin-top:4px">–</div>'}</div>`;
-      weekPnl=0;weekHas=false;cellsInRow=0;
+      html+=`<div class="cal-day week-total"><div class="day-num" style="color:var(--accent)">WEEK</div>${weekHas?`<div class="day-pnl ${weekPnl>=0?'g':'r'}" style="font-size:12px">${fmt(weekPnl)}</div>`:'<div style="font-size:11px;color:var(--text3);margin-top:4px">–</div>'}${weekPay>0?`<div style="font-size:10px;color:var(--green);margin-top:3px">payout +${grp(weekPay)}</div>`:''}</div>`;
+      weekPnl=0;weekPay=0;weekHas=false;cellsInRow=0;
     }
   }
   const rem=cellsInRow>0?(7-cellsInRow):0;
